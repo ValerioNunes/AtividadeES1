@@ -1,15 +1,9 @@
 package dcomp.es2.biblioteca.modelo;
 
-import dcomp.es2.biblioteca.repository.EmprestimoRepository;
 import dcomp.es2.biblioteca.repository.PagamentoRepository;
-import dcomp.es2.biblioteca.repository.PagamentoRepository;
-import dcomp.es2.biblioteca.repository.UsuarioRepository;
-import dcomp.es2.biblioteca.servico.EmprestimoService;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class TesteDeIntegracaoPagamentoRepositoryTest {
 
