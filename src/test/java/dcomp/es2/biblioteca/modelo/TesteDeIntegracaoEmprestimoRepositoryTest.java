@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import sun.awt.geom.AreaOp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,19 +52,13 @@ public class TesteDeIntegracaoEmprestimoRepositoryTest {
         livros.add(livro2);
         livros.add(livro3);
         System.out.println("Tamanho: " +livros.size());
-
         EmprestimoService emprestimoService =  new EmprestimoService();
         System.out.println(usuario.toString());
         livros.forEach( livro -> {
             System.out.println(livro.toString());
         });
-
         emprestimo = emprestimoService.emprestarLivro(usuario,livros);
-
         PagamentoRepository.getInstance().salvar(emprestimo.getPagamento());
-
-
-
     }
 
     @After
@@ -77,13 +72,33 @@ public class TesteDeIntegracaoEmprestimoRepositoryTest {
         System.out.println(emprestimo.toString());
         Emprestimo emprestimo1 = EmprestimoRepository.getInstance().getById(emprestimo.getId());
         System.out.println(emprestimo1.toString());
-
-
-
         Assertions.assertEquals(emprestimo,emprestimo1);
     }
 
+    @Test
+    public void RecuperamUmaListaDeLivrosEmprestados(){
 
+        emprestimo.setDataPrevista(LocalDateTime.now().plusDays(-1));
+        emprestimo = EmprestimoRepository.getInstance().salvar(emprestimo);
 
+       List<Livro> livros = EmprestimoRepository.getInstance().getLivroEmprestados();
+
+        livros.forEach( livro ->{
+                Assertions.assertTrue(livro.isEmprestado());
+        });
+    }
+
+    @Test
+    public void RecuperamUmaListaDeLivrosAtrasados(){
+
+        emprestimo.setDataPrevista(LocalDateTime.now().plusDays(-1));
+        emprestimo = EmprestimoRepository.getInstance().salvar(emprestimo);
+
+        List<Livro> livros = EmprestimoRepository.getInstance().getLivroEmprestados();
+
+        livros.forEach( livro ->{
+            Assertions.assertTrue(livro.isEmprestado());
+        });
+    }
 
 }

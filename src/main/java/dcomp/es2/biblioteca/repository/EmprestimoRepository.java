@@ -9,10 +9,12 @@ import dcomp.es2.biblioteca.repository_interface.EmprestimoRepositoryInterface;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EmprestimoRepository extends Repository implements EmprestimoRepositoryInterface {
     private static EmprestimoRepository instance;
+
 
     public static EmprestimoRepository getInstance(){
         if (instance == null){
@@ -41,12 +43,34 @@ public class EmprestimoRepository extends Repository implements EmprestimoReposi
 
     @Override
     public List<Livro> getLivroEmprestados() {
-        return null;
+
+        List<Livro> livros = new  ArrayList<>();
+        List<Emprestimo> emprestimos = entityManager.createQuery("FROM " +
+                Emprestimo.class.getName() + " e WHERE e.dataDevolucao is NULL ").getResultList();
+
+        emprestimos.forEach(emprestimo -> {
+            emprestimo.getLivros().forEach( livro -> {
+                livros.add(livro);
+            });
+        });
+
+        return livros;
     }
 
     @Override
     public List<Livro> getLivroEmAtraso() {
-        return null;
+
+        List<Livro> livros = new  ArrayList<>();
+        List<Emprestimo> emprestimos = entityManager.createQuery("FROM " +
+                Emprestimo.class.getName() + " e WHERE e.dataPrevista < now()").getResultList();
+
+        emprestimos.forEach( emprestimo -> {
+            emprestimo.getLivros().forEach( livro -> {
+                livros.add(livro);
+            });
+        });
+
+        return livros;
     }
 
     public Emprestimo atualizar(Emprestimo Emprestimo) {

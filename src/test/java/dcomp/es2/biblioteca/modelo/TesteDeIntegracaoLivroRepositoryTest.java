@@ -74,8 +74,6 @@ public class TesteDeIntegracaoLivroRepositoryTest {
         usuario.setNome("Tito");
         UsuarioRepository.getInstance().salvar(usuario);
 
-        System.out.println("Expo: "+ usuario.getId());
-
         Livro livro1 = LivroBuilder.umLivro().comNome("Livro1").constroi();
         livro1.setAutor("Autor1");
 
@@ -95,13 +93,7 @@ public class TesteDeIntegracaoLivroRepositoryTest {
         livros.add(livro2);
         livros.add(livro3);
 
-        System.out.println("Tamanho: " +livros.size());
-
         EmprestimoService emprestimoService =  new EmprestimoService();
-        System.out.println(usuario.toString());
-        livros.forEach( livro -> {
-            System.out.println(livro.toString());
-        });
 
         Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livros);
         PagamentoRepository.getInstance().salvar(emprestimo.getPagamento());
