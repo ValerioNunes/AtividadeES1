@@ -14,27 +14,36 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class EmprestimoService {
+
     private static final int numeroDiasEmprestimo = 7;
     private static final double valorAluguelFixo = 5.0d;
     private  static  final double taxaDiaria = 0.4d;
     private ArrayList<Emprestimo> emprestimosVirgentes;
 
-    public Emprestimo emprestarLivro(Usuario usuario, Livro  livro) {
+    public Emprestimo emprestarLivro(Usuario usuario, List<Livro>  livros) {
+
+
+        if (livros == null)
+            throw new IllegalArgumentException("Livros Invalidos");
+
+        livros.forEach( livro -> {
 
         if (livro.isEmprestado())
             throw new IllegalArgumentException("Livro emprestado");
         if (livro.isReservado())
             throw new IllegalArgumentException("Livro reservado");
 
+        });
         List<Emprestimo> emprestimosDoUsuario = getEmprestimosVirgentesDoUsuario(usuario);
 
        if (emprestimosDoUsuario.size() >= 2)
            throw new IllegalArgumentException("Usuario com numero maximo de emprestimos");
 
-        livro.setReservado(true);
-        livro.setEmprestado(true);
-        List<Livro> livros =  new ArrayList<>();
-        livros.add(livro);
+//        livro.setReservado(true);
+//        livro.setEmprestado(true);
+//        List<Livro> livros =  new ArrayList<>();
+//        livros.add(livro);
+
         Emprestimo emprestimo = EmprestimoBuilder.umEmprestivo()
                 .selecionarUsuario(usuario)
                 .selecionarLivro(livros)
@@ -46,12 +55,18 @@ public class EmprestimoService {
         //TODO adicionar método para salvar
         //daoEmprestivo.salva(Emprestimo);
         addEmprestimoVirgente(emprestimo);
+
         return emprestimo;
     }
 
     private void addEmprestimoVirgente(Emprestimo emprestimo){
-        if (emprestimosVirgentes == null)
+        if (emprestimosVirgentes == null) {
             emprestimosVirgentes = new ArrayList<Emprestimo>();
+          }
+        emprestimo.getLivros().forEach( livro -> {
+            livro.setEmprestado(true);
+            livro.setReservado(true);
+        } );
         emprestimosVirgentes.add(emprestimo);
     }
 
@@ -93,7 +108,6 @@ public class EmprestimoService {
         double valorPago = getValorAluguelFixo();
 
         Duration numeroDiasEmprestimo =  Duration.between( emprestimo.getDataPrevista(), emprestimo.getDataDevolucao());
-        System.out.println( Double.valueOf(numeroDiasEmprestimo.toDays()));
 
         if( !numeroDiasEmprestimo.isNegative()) {
             double valorAcrescimo = Double.valueOf(numeroDiasEmprestimo.toDays()) * taxaDiaria;

@@ -20,10 +20,10 @@ public class EmprestimoTest {
             usuario.setNome("Valerio");
             Livro livro = LivroBuilder.umLivro().comNome("Iracema").constroi();
             EmprestimoService emprestimoService =  new EmprestimoService();
-
-            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livro);
-
-            Assertions.assertEquals(true, emprestimo.getLivro().isReservado());
+            List<Livro> livros =  new ArrayList<>();
+            livros.add(livro);
+            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livros);
+            emprestimo.getLivros().forEach( l -> Assertions.assertEquals(true, l.isReservado()));
 
         }
 
@@ -35,10 +35,12 @@ public class EmprestimoTest {
             Livro livro = LivroBuilder.umLivro().comNome("Iracema").estaReservedo().constroi();
 
             EmprestimoService emprestimoService =  new EmprestimoService();
+            List<Livro> livros =  new ArrayList<>();
+            livros.add(livro);
 
             IllegalArgumentException exception =
                     Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> emprestimoService.emprestarLivro(usuario, livro),
+                    () -> emprestimoService.emprestarLivro(usuario, livros),
                     "Livro reservado");
            // Assertions.assertTrue(exception.getMessage().contains("Livro reservado"));
 
@@ -51,8 +53,9 @@ public class EmprestimoTest {
             usuario.setNome("Valerio");
             Livro livro = LivroBuilder.umLivro().comNome("Iracema").constroi();
             EmprestimoService emprestimoService =  new EmprestimoService();
-
-            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livro);
+            List<Livro> livros =  new ArrayList<>();
+            livros.add(livro);
+            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livros);
             LocalDateTime dataPrevista = emprestimo.getDataPrevista();
             LocalDateTime dataEmprestimo =  dataPrevista.plusDays(-EmprestimoService.getNumeroDiasMaximoSemAtraso());
 
@@ -78,8 +81,10 @@ public class EmprestimoTest {
             EmprestimoService emprestimoService =  new EmprestimoService();
 
             Livro livro1 = LivroBuilder.umLivro().comNome("Livro1").constroi();
+            List<Livro> livros =  new ArrayList<>();
+            livros.add(livro1);
 
-            Emprestimo emprestimo1 = emprestimoService.emprestarLivro(usuario,livro1);
+            Emprestimo emprestimo1 = emprestimoService.emprestarLivro(usuario,livros);
 
 
             List<Emprestimo> emprestimos = emprestimoService.getEmprestimosVirgentesDoUsuario(usuario);
@@ -99,8 +104,13 @@ public class EmprestimoTest {
             Livro livro1 = LivroBuilder.umLivro().comNome("Livro1").constroi();
             Livro livro2 = LivroBuilder.umLivro().comNome("Livro2").constroi();
 
-            Emprestimo emprestimo1 = emprestimoService.emprestarLivro(usuario,livro1);
-            Emprestimo emprestimo2 = emprestimoService.emprestarLivro(usuario,livro2);
+            List<Livro> livros1 =  new ArrayList<>();
+            livros1.add(livro1);
+            Emprestimo emprestimo1 = emprestimoService.emprestarLivro(usuario,livros1);
+
+            List<Livro> livros2 =  new ArrayList<>();
+            livros2.add(livro2);
+            Emprestimo emprestimo2 = emprestimoService.emprestarLivro(usuario,livros2);
 
             List<Emprestimo> emprestimos = emprestimoService.getEmprestimosVirgentesDoUsuario(usuario);
 
@@ -123,11 +133,20 @@ public class EmprestimoTest {
             Livro livro2 = LivroBuilder.umLivro().comNome("Livro2").constroi();
             Livro livro3 = LivroBuilder.umLivro().comNome("Livro3").constroi();
 
-            emprestimoService.emprestarLivro(usuario,livro1);
-            emprestimoService.emprestarLivro(usuario,livro2);
+            List<Livro> livros1 =  new ArrayList<>();
+            livros1.add(livro1);
+            emprestimoService.emprestarLivro(usuario,livros1);
+
+            List<Livro> livros2 =  new ArrayList<>();
+            livros2.add(livro2);
+            emprestimoService.emprestarLivro(usuario,livros2);
+
+
+            List<Livro> livros3 =  new ArrayList<>();
+            livros3.add(livro3);
 
             Assertions.assertThrows( IllegalArgumentException.class,
-                    () -> emprestimoService.emprestarLivro(usuario,livro3),
+                    () -> emprestimoService.emprestarLivro(usuario,livros3),
                     "Usuario com numero maximo de emprestimos");
         }
 
@@ -139,13 +158,21 @@ public class EmprestimoTest {
 
             Livro livro = LivroBuilder.umLivro().comNome("Livro1").constroi();
 
-            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livro);
+            List<Livro> livros1 =  new ArrayList<>();
+            livros1.add(livro);
 
-            Assertions.assertEquals(true,emprestimo.getLivro().isEmprestado());
+            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livros1);
 
+
+
+            emprestimo.getLivros().forEach( lv ->
+                    Assertions.assertEquals(true,lv.isEmprestado())
+            );
             emprestimo = emprestimoService.finalizarEmprestimo(emprestimo);
 
-            Assertions.assertEquals(false,emprestimo.getLivro().isEmprestado());
+            emprestimo.getLivros().forEach( lv ->
+                    Assertions.assertEquals(false,lv.isEmprestado())
+            );
             Assertions.assertEquals(EmprestimoService.getValorAluguelFixo(),emprestimo.getPagamento().valorPago);
         }
 
@@ -158,15 +185,21 @@ public class EmprestimoTest {
 
             Livro livro = LivroBuilder.umLivro().comNome("Livro1").constroi();
 
-            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livro);
 
-            Assertions.assertEquals(true,emprestimo.getLivro().isEmprestado());
+            List<Livro> livros1 =  new ArrayList<>();
+            livros1.add(livro);
+            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livros1);
+
+            emprestimo.getLivros().forEach( lv ->
+                    Assertions.assertEquals(true,lv.isEmprestado())
+            );
 
             emprestimo.setDataDevolucao(LocalDateTime.now().plusDays(7));
 
             emprestimo = emprestimoService.finalizarEmprestimo(emprestimo);
-
-            Assertions.assertEquals(false,emprestimo.getLivro().isEmprestado());
+            emprestimo.getLivros().forEach( lv ->
+                    Assertions.assertEquals(false,lv.isEmprestado())
+            );
             Assertions.assertEquals(EmprestimoService.getValorAluguelFixo(),emprestimo.getPagamento().valorPago);
         }
 
@@ -179,15 +212,22 @@ public class EmprestimoTest {
 
             Livro livro = LivroBuilder.umLivro().comNome("Livro1").constroi();
 
-            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livro);
 
-            Assertions.assertEquals(true,emprestimo.getLivro().isEmprestado());
+            List<Livro> livros1 =  new ArrayList<>();
+            livros1.add(livro);
+            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livros1);
+            emprestimo.getLivros().forEach( lv ->
+                    Assertions.assertEquals(true,lv.isEmprestado())
+            );
 
             emprestimo.setDataDevolucao(LocalDateTime.now().plusDays(8));
 
             emprestimo = emprestimoService.finalizarEmprestimo(emprestimo);
 
-            Assertions.assertEquals(false,emprestimo.getLivro().isEmprestado());
+            emprestimo.getLivros().forEach( lv ->
+                    Assertions.assertEquals(false,lv.isEmprestado())
+            );
+
             double valor = EmprestimoService.getValorAluguelFixo() + EmprestimoService.getTaxaDiaria();
 
             Assertions.assertEquals(valor,emprestimo.getPagamento().valorPago);
@@ -202,15 +242,20 @@ public class EmprestimoTest {
 
             Livro livro = LivroBuilder.umLivro().comNome("Livro1").constroi();
 
-            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livro);
+
+            List<Livro> livros1 =  new ArrayList<>();
+            livros1.add(livro);
+            Emprestimo emprestimo = emprestimoService.emprestarLivro(usuario,livros1);
 
 
             emprestimo.setDataDevolucao(LocalDateTime.now().plusDays(30));
 
             emprestimo = emprestimoService.finalizarEmprestimo(emprestimo);
 
+            emprestimo.getLivros().forEach( lv ->
+                    Assertions.assertEquals(false,lv.isEmprestado())
+            );
 
-            Assertions.assertEquals(false,emprestimo.getLivro().isEmprestado());
             double valor = EmprestimoService.getValorAluguelFixo() + EmprestimoService.getValorAluguelFixoPoncentagemDe(60);
 
             Assertions.assertEquals(valor,emprestimo.getPagamento().valorPago);

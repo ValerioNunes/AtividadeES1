@@ -1,29 +1,32 @@
 package dcomp.es2.biblioteca.repository;
-import dcomp.es2.biblioteca.modelo.Pagamento;
-import dcomp.es2.biblioteca.repository_interface.PagamentoRepositoryInterface;
+import dcomp.es2.biblioteca.modelo.Emprestimo;
+import dcomp.es2.biblioteca.modelo.Usuario;
+import dcomp.es2.biblioteca.repository_interface.UsuarioRepositoryInterface;
 
-public class PagamentoRepository extends Repository  implements PagamentoRepositoryInterface {
+import java.util.List;
+
+public class UsuarioRepository extends Repository  implements UsuarioRepositoryInterface {
     
-    private static PagamentoRepository instance;
+    private static UsuarioRepository instance;
 
-    public static PagamentoRepository getInstance(){
+    public static UsuarioRepository getInstance(){
         if (instance == null){
-            instance = new PagamentoRepository();
+            instance = new UsuarioRepository();
         }
         return instance;
     }
 
-    public PagamentoRepository() {
+    public UsuarioRepository() {
         entityManager = getEntityManager();
     }
 
     @Override
-    public Pagamento salvar(Pagamento pagamento) {
+    public Usuario salvar(Usuario usuario) {
         try {
             entityManager.getTransaction().begin();
-            entityManager.persist(pagamento);
+            entityManager.persist(usuario);
             entityManager.getTransaction().commit();
-            return pagamento;
+            return usuario;
         } catch (Exception ex) {
             //ex.printStackTrace();
             entityManager.getTransaction().rollback();
@@ -32,12 +35,12 @@ public class PagamentoRepository extends Repository  implements PagamentoReposit
     }
 
     @Override
-    public Pagamento atualizar(Pagamento pagamento) {
+    public Usuario atualizar(Usuario usuario) {
         try {
             entityManager.getTransaction().begin();
-            entityManager.merge(pagamento);
+            entityManager.merge(usuario);
             entityManager.getTransaction().commit();
-            return pagamento;
+            return usuario;
         } catch (Exception ex) {
             //ex.printStackTrace();
             entityManager.getTransaction().rollback();
@@ -45,11 +48,11 @@ public class PagamentoRepository extends Repository  implements PagamentoReposit
         return  null;
     }
 
-    public void remove(Pagamento pagamento) {
+    public void remove(Usuario usuario) {
         try {
             entityManager.getTransaction().begin();
-            pagamento = entityManager.find(Pagamento.class, pagamento.getId());
-            entityManager.remove(pagamento);
+            usuario = entityManager.find(Usuario.class, usuario.getId());
+            entityManager.remove(usuario);
             entityManager.getTransaction().commit();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -58,7 +61,7 @@ public class PagamentoRepository extends Repository  implements PagamentoReposit
     }
 
     @Override
-    public Pagamento getById(final int id) {
-        return entityManager.find(Pagamento.class, id);
+    public Usuario getById(final int id) {
+        return entityManager.find(Usuario.class, id);
     }
 }

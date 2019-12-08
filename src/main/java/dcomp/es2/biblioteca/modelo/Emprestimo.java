@@ -15,7 +15,7 @@ public class Emprestimo {
     @ManyToOne(cascade= {CascadeType.MERGE, CascadeType.PERSIST})
     private Usuario usuario;
 
-    @ManyToMany(cascade=CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private List<Livro> livros =  new ArrayList<>();
 
     private LocalDateTime dataEmprestimo;
@@ -81,5 +81,18 @@ public class Emprestimo {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Emprestimo{" +
+                "id=" + id +
+                ", usuario=" + usuario +
+                ", livros=" + livros +
+                ", dataEmprestimo=" + dataEmprestimo +
+                ", dataPrevista=" + dataPrevista +
+                ", dataDevolucao=" + dataDevolucao +
+                ", pagamento=" + pagamento +
+                '}';
     }
 }
