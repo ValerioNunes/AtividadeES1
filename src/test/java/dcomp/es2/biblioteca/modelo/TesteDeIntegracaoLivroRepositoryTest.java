@@ -6,12 +6,8 @@ import dcomp.es2.biblioteca.repository.LivroRepository;
 import dcomp.es2.biblioteca.repository.PagamentoRepository;
 import dcomp.es2.biblioteca.repository.UsuarioRepository;
 import dcomp.es2.biblioteca.servico.EmprestimoService;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 
 import java.util.ArrayList;
 import java.util.List;

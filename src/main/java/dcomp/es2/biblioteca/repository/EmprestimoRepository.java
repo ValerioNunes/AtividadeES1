@@ -1,20 +1,16 @@
 package dcomp.es2.biblioteca.repository;
 
 import dcomp.es2.biblioteca.modelo.Emprestimo;
-import dcomp.es2.biblioteca.modelo.Emprestimo;
 import dcomp.es2.biblioteca.modelo.Livro;
 import dcomp.es2.biblioteca.modelo.Usuario;
 import dcomp.es2.biblioteca.repository_interface.EmprestimoRepositoryInterface;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EmprestimoRepository extends Repository implements EmprestimoRepositoryInterface {
     private static EmprestimoRepository instance;
-
 
     public static EmprestimoRepository getInstance(){
         if (instance == null){
@@ -64,13 +60,45 @@ public class EmprestimoRepository extends Repository implements EmprestimoReposi
         List<Emprestimo> emprestimos = entityManager.createQuery("FROM " +
                 Emprestimo.class.getName() + " e WHERE e.dataPrevista < now()").getResultList();
 
-        emprestimos.forEach( emprestimo -> {
-            emprestimo.getLivros().forEach( livro -> {
+        emprestimos.forEach(emprestimo -> {
+            emprestimo.getLivros().forEach(livro -> {
                 livros.add(livro);
             });
         });
 
         return livros;
+    }
+
+    public List<Livro> getLivroNoPeriodo(LocalDateTime inicio, LocalDateTime fim) {
+
+        List<Livro> livros = new ArrayList<>();
+        List<Emprestimo> emprestimos = entityManager.createQuery("FROM " +
+                Emprestimo.class.getName() + " e WHERE e.dataEmprestimo BETWEEN  :inicio and :fim")
+                .setParameter("inicio", inicio)
+                .setParameter("fim", fim)
+                .getResultList();
+        emprestimos.forEach(emprestimo -> {
+            emprestimo.getLivros().forEach(livro -> {
+                livros.add(livro);
+            });
+        });
+
+        return livros;
+    }
+
+    @Override
+    public List<Usuario> getUsuarioEmAtraso() {
+
+        List<Usuario> usuarios = new ArrayList<>();
+        List<Emprestimo> emprestimos = entityManager.createQuery(
+                "FROM " + Emprestimo.class.getName() + " e WHERE e.dataPrevista < now()").getResultList();
+
+        emprestimos.forEach(emprestimo -> {
+
+            usuarios.add(emprestimo.getUsuario());
+        });
+        //System.out.println(usuarios);
+        return usuarios;
     }
 
     public Emprestimo atualizar(Emprestimo Emprestimo) {

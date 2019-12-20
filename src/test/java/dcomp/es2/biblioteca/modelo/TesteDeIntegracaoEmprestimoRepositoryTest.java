@@ -1,6 +1,5 @@
 package dcomp.es2.biblioteca.modelo;
 
-import dcomp.es2.biblioteca.builder.EmprestimoBuilder;
 import dcomp.es2.biblioteca.builder.LivroBuilder;
 import dcomp.es2.biblioteca.repository.EmprestimoRepository;
 import dcomp.es2.biblioteca.repository.LivroRepository;
@@ -11,7 +10,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import sun.awt.geom.AreaOp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

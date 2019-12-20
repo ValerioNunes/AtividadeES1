@@ -1,15 +1,13 @@
 package dcomp.es2.biblioteca.modelo;
+
 import dcomp.es2.biblioteca.builder.LivroBuilder;
 import dcomp.es2.biblioteca.servico.EmprestimoService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static jdk.nashorn.internal.objects.Global.print;
 
 public class EmprestimoTest {
 

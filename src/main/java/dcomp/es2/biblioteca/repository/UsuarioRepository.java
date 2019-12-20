@@ -1,9 +1,7 @@
 package dcomp.es2.biblioteca.repository;
-import dcomp.es2.biblioteca.modelo.Emprestimo;
+
 import dcomp.es2.biblioteca.modelo.Usuario;
 import dcomp.es2.biblioteca.repository_interface.UsuarioRepositoryInterface;
-
-import java.util.List;
 
 public class UsuarioRepository extends Repository  implements UsuarioRepositoryInterface {
     

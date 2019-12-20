@@ -5,30 +5,32 @@ import dcomp.es2.biblioteca.modelo.Emprestimo;
 import dcomp.es2.biblioteca.modelo.Livro;
 import dcomp.es2.biblioteca.modelo.Pagamento;
 import dcomp.es2.biblioteca.modelo.Usuario;
+import dcomp.es2.biblioteca.repository.EmprestimoRepository;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class EmprestimoService {
 
     private static final int numeroDiasEmprestimo = 7;
     private static final double valorAluguelFixo = 5.0d;
-    private  static  final double taxaDiaria = 0.4d;
+    private static final double taxaDiaria = 0.4d;
     private ArrayList<Emprestimo> emprestimosVirgentes;
+    private EnviadorDeEmail emailService;
+    static EmprestimoRepository emprestimoRepository = new EmprestimoRepository();
 
-    public Emprestimo emprestarLivro(Usuario usuario, List<Livro>  livros) {
+    public Emprestimo emprestarLivro(Usuario usuario, List<Livro> livros) {
 
+        if (livros == null) {
 
-        if (livros == null)
             throw new IllegalArgumentException("Livros Invalidos");
+        }
+        livros.forEach(livro -> {
 
-        livros.forEach( livro -> {
-
-        if (livro.isEmprestado())
+            if (livro.isEmprestado())
             throw new IllegalArgumentException("Livro emprestado");
         if (livro.isReservado())
             throw new IllegalArgumentException("Livro reservado");
@@ -124,14 +126,40 @@ public class EmprestimoService {
 
     public Emprestimo finalizarEmprestimo(Emprestimo emprestimo){
         if( emprestimosVirgentes !=  null  & emprestimosVirgentes.contains(emprestimo)){
-            if(emprestimo.getDataDevolucao() == null)
+            if (emprestimo.getDataDevolucao() == null)
                 emprestimo.setDataDevolucao(LocalDateTime.now());
             double valor = getValorParaSerPago(emprestimo);
-            Pagamento  pagamento = new Pagamento(valor);
+            Pagamento pagamento = new Pagamento(valor);
 
             emprestimo.setPagamento(pagamento);
             removerEmprestimoVirgente(emprestimo);
         }
         return emprestimo;
+    }
+
+
+    public List<Usuario> enviarEmailParaUsuarioComAtraso() {
+        List<Usuario> usuarioComErroEmail = new ArrayList<>();
+        emprestimoRepository.getUsuarioEmAtraso().forEach(usuario -> {
+            if (enviarEmailDeAtrasoEmprestimo(usuario) != null) {
+                usuarioComErroEmail.add(usuario);
+            }
+        });
+        if (usuarioComErroEmail.size() > 0)
+            throw new IllegalArgumentException("Usuário sem email cadastrado");
+
+        return usuarioComErroEmail;
+    }
+
+    public Usuario enviarEmailDeAtrasoEmprestimo(Usuario usuario) {
+        return emailService.enviarEmailPara(usuario, "Atraso na devolução de Livros blabla");
+    }
+
+    public EnviadorDeEmail getEmailService() {
+        return emailService;
+    }
+
+    public void setEmailService(EnviadorDeEmail emailService) {
+        this.emailService = emailService;
     }
 }

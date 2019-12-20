@@ -2,6 +2,7 @@ package dcomp.es2.biblioteca.modelo;
 
 import javax.persistence.*;
 
+
 @Entity
 public class Pagamento {
     @Id

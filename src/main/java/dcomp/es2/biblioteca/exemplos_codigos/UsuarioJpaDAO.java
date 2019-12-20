@@ -4,11 +4,10 @@ package dcomp.es2.biblioteca.exemplos_codigos;
 
 import dcomp.es2.biblioteca.modelo.Usuario;
 
-import java.util.List;
- 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import java.util.List;
 
     public class UsuarioJpaDAO {
 
