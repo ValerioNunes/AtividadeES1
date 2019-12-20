@@ -142,7 +142,9 @@ public class TesteServicesEmprestimoTest {
 
 
         usuarioEmAtrasoEsperado.forEach(usuario -> {
+
             assertTrue(usuarioEmAtraso.contains(usuario));
+
         });
 
         IllegalArgumentException exception =
