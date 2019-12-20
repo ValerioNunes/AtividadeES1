@@ -10,9 +10,11 @@ import dcomp.es2.biblioteca.repository.PagamentoRepository;
 import dcomp.es2.biblioteca.repository.UsuarioRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.runners.MethodSorters;
 import org.mockito.*;
 
 import java.io.EOFException;
@@ -24,8 +26,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TesteServicesEmprestimoTest {
-
 
     Emprestimo emprestimo1, emprestimo2, emprestimo3;
     //@Mock
@@ -110,14 +112,24 @@ public class TesteServicesEmprestimoTest {
 
     @After
     public void FinalizarTest() {
-        //       EmprestimoRepository.getInstance().remove(emprestimo1);
-        //       EmprestimoRepository.getInstance().remove(emprestimo2);
-//        EmprestimoRepository.getInstance().remove(emprestimo3);
+        EmprestimoRepository.getInstance().remove(emprestimo1);
+        EmprestimoRepository.getInstance().remove(emprestimo2);
+        EmprestimoRepository.getInstance().remove(emprestimo3);
+
+        LivroRepository.getInstance().remove(livro1);
+        LivroRepository.getInstance().remove(livro2);
+        LivroRepository.getInstance().remove(livro3);
+
+
+        UsuarioRepository.getInstance().remove(usuario1);
+        UsuarioRepository.getInstance().remove(usuario2);
+        UsuarioRepository.getInstance().remove(usuario3);
+
 
     }
 
     @Test
-    public void TesteEnvioDeEmailParaOsUsuarioEmprestimoForaData() {
+    public void Teste1EnvioDeEmailParaOsUsuarioEmprestimoForaData() {
         emprestimo2.setDataPrevista(LocalDateTime.now().plusDays(-1));
         emprestimo3.setDataPrevista(LocalDateTime.now().plusDays(-1));
 
@@ -127,7 +139,7 @@ public class TesteServicesEmprestimoTest {
 
         List<Usuario> usuarioEmAtrasoEsperado = Arrays.asList(usuario2, usuario3);
         List<Usuario> usuarioEmAtraso = emprestimoRepository.getUsuarioEmAtraso();
-        System.out.println(usuarioEmAtraso);
+
 
         usuarioEmAtrasoEsperado.forEach(usuario -> {
             assertTrue(usuarioEmAtraso.contains(usuario));
@@ -159,37 +171,10 @@ public class TesteServicesEmprestimoTest {
             System.out.println(usuario.getNome());
             verify(emailService, Mockito.times(1)).enviarEmailPara(usuario, "Atraso na devolução de Livros blabla");
         });
-
-
     }
 
     @Test
-    public void TesteRecuperacaoDeListaEmprestimosFeitoNumDadoPeriodo() {
-
-        emprestimo1.setDataEmprestimo(LocalDateTime.now().plusDays(-7));
-        emprestimo2.setDataEmprestimo(LocalDateTime.now().plusDays(-3));
-        emprestimo3.setDataEmprestimo(LocalDateTime.now().plusDays(-1));
-
-        EmprestimoRepository.getInstance().salvar(emprestimo1);
-        EmprestimoRepository.getInstance().salvar(emprestimo2);
-        EmprestimoRepository.getInstance().salvar(emprestimo3);
-
-
-        LocalDateTime inicio = LocalDateTime.now().plusDays(-6);
-        LocalDateTime fim = LocalDateTime.now().plusDays(-2);
-        List<Livro> livros = estatisticasDeEmprestimo.getLivrosEmprestadoNoPeriodo(inicio, fim);
-        assertEquals(1, livros.size());
-        assertTrue(livros.contains(livro2));
-
-        List<Livro> livroDoPeriodo = new ArrayList<Livro>();
-        livroDoPeriodo.add(livro2);
-
-        MockitoAnnotations.initMocks(this);
-        when(emprestimoRepository.getLivroNoPeriodo(inicio, fim)).thenReturn(livroDoPeriodo);
-    }
-
-    @Test
-    public void TesteDePagamentoDeLivrosPorUsuario() {
+    public void Teste2DePagamentoDeLivrosPorUsuario() {
         emprestimo1.setDataEmprestimo(LocalDateTime.now().plusDays(-27));
         emprestimo1.setDataPrevista(emprestimo1.getDataEmprestimo().plusDays(7));
 
@@ -216,5 +201,32 @@ public class TesteServicesEmprestimoTest {
         emprestimoService.finalizarEmprestimo(emprestimo1);
         Mockito.when(emprestimoService.getValorParaSerPago(emprestimo1)).thenReturn(valor);
 
+
     }
+
+    @Test
+    public void Teste3RecuperacaoDeListaEmprestimosFeitoNumDadoPeriodo() {
+
+        emprestimo1.setDataEmprestimo(LocalDateTime.now().plusDays(-7));
+        emprestimo2.setDataEmprestimo(LocalDateTime.now().plusDays(-3));
+        emprestimo3.setDataEmprestimo(LocalDateTime.now().plusDays(-1));
+
+        EmprestimoRepository.getInstance().salvar(emprestimo1);
+        EmprestimoRepository.getInstance().salvar(emprestimo2);
+        EmprestimoRepository.getInstance().salvar(emprestimo3);
+
+
+        LocalDateTime inicio = LocalDateTime.now().plusDays(-6);
+        LocalDateTime fim = LocalDateTime.now().plusDays(-2);
+        List<Livro> livros = estatisticasDeEmprestimo.getLivrosEmprestadoNoPeriodo(inicio, fim);
+        assertEquals(1, livros.size());
+        assertTrue(livros.contains(livro2));
+
+        List<Livro> livroDoPeriodo = new ArrayList<Livro>();
+        livroDoPeriodo.add(livro2);
+
+        MockitoAnnotations.initMocks(this);
+        when(emprestimoRepository.getLivroNoPeriodo(inicio, fim)).thenReturn(livroDoPeriodo);
+    }
+
 }
