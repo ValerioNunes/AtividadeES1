@@ -110,8 +110,8 @@ public class TesteServicesEmprestimoTest {
 
     @After
     public void FinalizarTest() {
-//        EmprestimoRepository.getInstance().remove(emprestimo1);
-//        EmprestimoRepository.getInstance().remove(emprestimo2);
+        //       EmprestimoRepository.getInstance().remove(emprestimo1);
+        //       EmprestimoRepository.getInstance().remove(emprestimo2);
 //        EmprestimoRepository.getInstance().remove(emprestimo3);
 
     }
@@ -174,6 +174,7 @@ public class TesteServicesEmprestimoTest {
         EmprestimoRepository.getInstance().salvar(emprestimo2);
         EmprestimoRepository.getInstance().salvar(emprestimo3);
 
+
         LocalDateTime inicio = LocalDateTime.now().plusDays(-6);
         LocalDateTime fim = LocalDateTime.now().plusDays(-2);
         List<Livro> livros = estatisticasDeEmprestimo.getLivrosEmprestadoNoPeriodo(inicio, fim);
@@ -185,5 +186,35 @@ public class TesteServicesEmprestimoTest {
 
         MockitoAnnotations.initMocks(this);
         when(emprestimoRepository.getLivroNoPeriodo(inicio, fim)).thenReturn(livroDoPeriodo);
+    }
+
+    @Test
+    public void TesteDePagamentoDeLivrosPorUsuario() {
+        emprestimo1.setDataEmprestimo(LocalDateTime.now().plusDays(-27));
+        emprestimo1.setDataPrevista(emprestimo1.getDataEmprestimo().plusDays(7));
+
+        List<Livro> livrosEmprestados = new ArrayList<Livro>();
+        livrosEmprestados.add(livro1);
+        livrosEmprestados.add(livro2);
+        emprestimo1.setLivros(livrosEmprestados);
+
+        emprestimo1 = EmprestimoRepository.getInstance().salvar(emprestimo1);
+
+        emprestimoService.finalizarEmprestimo(emprestimo1);
+
+        Emprestimo emprestimoDeAnalise = EmprestimoRepository.getInstance().getById(emprestimo1.getId());
+        System.out.println(emprestimoDeAnalise);
+        emprestimo1.getLivros().forEach(livro ->
+                Assertions.assertEquals(false, livro.isEmprestado())
+        );
+
+        int quantidadeLivros = emprestimo1.getLivros().size();
+        double valor = (EmprestimoService.getValorAluguelFixo() + EmprestimoService.getValorAluguelFixoPoncentagemDe(60)) * quantidadeLivros;
+        Assertions.assertEquals(valor, emprestimo1.getPagamento().getValorPago());
+
+        MockitoAnnotations.initMocks(this);
+        emprestimoService.finalizarEmprestimo(emprestimo1);
+        Mockito.when(emprestimoService.getValorParaSerPago(emprestimo1)).thenReturn(valor);
+
     }
 }

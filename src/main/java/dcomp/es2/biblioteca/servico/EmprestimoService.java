@@ -6,6 +6,8 @@ import dcomp.es2.biblioteca.modelo.Livro;
 import dcomp.es2.biblioteca.modelo.Pagamento;
 import dcomp.es2.biblioteca.modelo.Usuario;
 import dcomp.es2.biblioteca.repository.EmprestimoRepository;
+import dcomp.es2.biblioteca.repository.LivroRepository;
+import dcomp.es2.biblioteca.repository.PagamentoRepository;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -64,30 +66,32 @@ public class EmprestimoService {
     private void addEmprestimoVirgente(Emprestimo emprestimo){
         if (emprestimosVirgentes == null) {
             emprestimosVirgentes = new ArrayList<Emprestimo>();
-          }
-        emprestimo.getLivros().forEach( livro -> {
+        }
+        emprestimo.getLivros().forEach(livro -> {
             livro.setEmprestado(true);
             livro.setReservado(true);
-        } );
+        });
         emprestimosVirgentes.add(emprestimo);
     }
 
-    private void removerEmprestimoVirgente(Emprestimo emprestimo){
-        if (emprestimosVirgentes != null) {
-            if(emprestimosVirgentes.contains(emprestimo)) {
-                emprestimosVirgentes.remove(emprestimo);
-                emprestimo.getLivros().forEach( livro -> livro.setEmprestado(false));
-            }
-        }
+    private Emprestimo removerEmprestimoVirgente(Emprestimo emprestimo) {
+
+        emprestimo.getLivros().forEach(livro -> {
+            livro.setEmprestado(false);
+            livro.setReservado(false);
+            LivroRepository.getInstance().atualizar(livro);
+        });
+
+        return emprestimo;
     }
 
-    public List<Emprestimo> getEmprestimosVirgentesDoUsuario(Usuario usuario){
+    public List<Emprestimo> getEmprestimosVirgentesDoUsuario(Usuario usuario) {
         List<Emprestimo> emprestimos = new ArrayList<Emprestimo>();
-        if(emprestimosVirgentes == null)
-            return  emprestimos;
+        if (emprestimosVirgentes == null)
+            return emprestimos;
         emprestimos = emprestimosVirgentes.stream().filter(p
                 -> p.getUsuario().getNome().equals(usuario.getNome())).collect(Collectors.toList());
-        return  emprestimos;
+        return emprestimos;
     }
 
     public static int getNumeroDiasMaximoSemAtraso(){
@@ -106,34 +110,37 @@ public class EmprestimoService {
         return valorAluguelFixo*(pct/100.0d);
     }
 
-    private double getValorParaSerPago(Emprestimo emprestimo){
+    public double getValorParaSerPago(Emprestimo emprestimo) {
         double valorPago = getValorAluguelFixo();
 
-        Duration numeroDiasEmprestimo =  Duration.between( emprestimo.getDataPrevista(), emprestimo.getDataDevolucao());
+        Duration numeroDiasEmprestimo = Duration.between(emprestimo.getDataPrevista(), emprestimo.getDataDevolucao());
 
-        if( !numeroDiasEmprestimo.isNegative()) {
+        if (!numeroDiasEmprestimo.isNegative()) {
             double valorAcrescimo = Double.valueOf(numeroDiasEmprestimo.toDays()) * taxaDiaria;
 
-            if(valorAcrescimo > getValorAluguelFixoPoncentagemDe(60)){
+            if (valorAcrescimo > getValorAluguelFixoPoncentagemDe(60)) {
                 valorPago += getValorAluguelFixoPoncentagemDe(60);
-            }else{
+            } else {
                 valorPago += valorAcrescimo;
             }
         }
+        int quantidadeLivro = emprestimo.getLivros().size();
 
-        return valorPago;
+        return valorPago * quantidadeLivro;
     }
 
-    public Emprestimo finalizarEmprestimo(Emprestimo emprestimo){
-        if( emprestimosVirgentes !=  null  & emprestimosVirgentes.contains(emprestimo)){
-            if (emprestimo.getDataDevolucao() == null)
-                emprestimo.setDataDevolucao(LocalDateTime.now());
-            double valor = getValorParaSerPago(emprestimo);
-            Pagamento pagamento = new Pagamento(valor);
+    public Emprestimo finalizarEmprestimo(Emprestimo emprestimo) {
+        //  if((emprestimosVirgentes !=  null  & emprestimosVirgentes.contains(emprestimo)) || emprestimo.getId() != null){
+        if (emprestimo.getDataDevolucao() == null)
+            emprestimo.setDataDevolucao(LocalDateTime.now());
+        double valor = getValorParaSerPago(emprestimo);
+        Pagamento pagamento = new Pagamento(valor);
+        PagamentoRepository.getInstance().salvar(pagamento);
+        emprestimo.setPagamento(pagamento);
+        emprestimo = removerEmprestimoVirgente(emprestimo);
+        // }
+        emprestimo = emprestimoRepository.atualizar(emprestimo);
 
-            emprestimo.setPagamento(pagamento);
-            removerEmprestimoVirgente(emprestimo);
-        }
         return emprestimo;
     }
 
